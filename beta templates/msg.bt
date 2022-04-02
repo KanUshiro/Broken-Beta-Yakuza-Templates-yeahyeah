@@ -1,0 +1,321 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+#include "pac_enums_y0.bt"
+local u32 headerColor = SetRandomBackColor();
+BigEndian();
+
+struct Msg{
+    ubyte Unk20F7[3]<name="Header Unk", format=binary>;
+    ubyte StructureCount;
+    int32 StructPointer<format=hex>;
+    int32 AdditionalCoordPointer<format=hex>;
+    int16 AdditionalCoordCount;
+    int16 TextCount;
+    int32 TextPointerPointer<format=hex>;
+    int32 MSGPointer<format=hex>;
+    struct DataNodes{
+    local int j;
+        for ( j = 0; j < StructureCount; j++)
+        {
+            struct Structure{
+                SetRandomBackColor();
+                int32 ConditionPointer<hidden=true>;
+                int32 RefDataPointer<hidden=true>;
+                ubyte ConditionCount<hidden=true>;
+                ubyte RefDataCount<hidden=true>;
+                ubyte UnkFlagOrCount<name="Unk1">;
+                ubyte Unk32_64<name="Unk2">;
+                struct IntParam{
+                    struct IntFlags1{
+                        Toggle Unk1 : 1<name="Unk1 Toggle">;
+                        Toggle InteractToggle : 1<name="Interaction Toggle">;
+                        Toggle ZoomToggle : 1<name="Camera Zoom">;
+                        Toggle Unk2 : 1<name="Unk2 Toggle">;
+                        InteractionDisplay Display : 4<name="Interaction Display">;
+                    }intflags<name="Interaction Flags 1",read=ReadInt1>;
+                    struct IntFlags2{
+                        Toggle AutoInteract : 1<name="Automatic Interaction">; // the entity interacts with you
+                        Toggle Unk3 : 1<name="Unk3 Toggle">;
+                        Toggle Unk4 : 1<name="Unk4 Toggle">;
+                        Toggle Turn : 1<name="Character looks at you">;
+                        Toggle Unk5 : 1<name="Unk5 Toggle">;
+                        Toggle Unk6 : 1<name="Unk6 Toggle">;
+                        Toggle Unk7 : 1<name="Unk7 Toggle">;
+                        Toggle Unk8 : 1<name="Unk8 Toggle">;
+                    }intflags2<name="Interaction Flags 2", read=ReadInt2>;
+                    Toggle Follow<name="Follower Toggle">; //disregard coords; load entity near player
+                    IntFlags3 Flags3<name="Speech Bubble", format=binary>;
+                }intparam<name="Interaction Parameters">;
+                local int staystruc = FTell();
+                FSeek(ConditionPointer);
+                if (ConditionCount > 0)
+                    {
+                        struct Conditions{
+                            local int lol;
+                            for ( lol = 0; lol < ConditionCount; lol++)
+                                {
+                                    struct ConditionNode{
+                                        Condition Property<name="Condition Property Type">;
+                                        switch (Property){
+                                            case 32:
+                                            int32 AttachNode<name="String attaches to action ID",format=hex>;
+                                            int32 Unk;
+                                            break;
+                                        case 39:
+                                            int32 AttachNode<name="String attaches to character ID",format=hex>;
+                                            int32 Unk;
+                                            break;
+                                        default:
+                                            int32 ConditionFlags<name="Condition Flags">;
+                                            int32 ConditionFlags<name="Condition Flags">;
+                                            break;
+                                        }
+                                    }conditionnode<name="Condition",read=ReadCondiNode>;
+                                }
+                        }conditions<name="Conditions">;
+                    }
+                FSeek(RefDataPointer);
+                if (RefDataCount > 0)
+                    {
+                        local int parallax;
+                        for ( parallax = 0; parallax < RefDataCount; parallax++)
+                            {
+                                struct RefData{
+                                    int16 TextToggle; //check if always unused
+                                    ubyte RefStructCount;
+                                    ubyte Unused; //check if always unused
+                                    int32 ShitBytePointer;
+                                    local int stayshit = FTell();
+                                    FSeek(ShitBytePointer);
+                                    if (TextToggle==0)
+                                        {
+                                            ubyte UnusedByte<hidden=true>;//can be text
+                                        }
+                                    else
+                                        {
+                                            struct RefString{
+                                                char RefStr[];
+                                            }refstr<name="Text String",read=RefStr>;
+                                        }
+                                    FSeek(stayshit);
+                                    int32 RefStructPointer<hidden=true>;
+                                    local int stayref = FTell();
+                                    FSeek(RefStructPointer);
+                                    local int c;
+                                    for (c = 0; c < RefStructCount; c++)
+                                        {
+                                            struct RefStruct{
+                                                RefProperty Property : 24<format=hex>;
+                                                switch (Property){
+                                                    case 209216:
+                                                        int32 Unused<hidden=true>;
+                                                        int32 Always2<hidden=true>;
+                                                        int16 ACB<name="ACB",format=hex>;
+                                                        int16 Track<name="Track">;
+                                                        break;
+
+                                                    case 197632:
+                                                        int32 Unused<hidden=true>;
+                                                        int32 Player_Pos<name="Player_Pos">;
+                                                        int32 Unused<hidden=true>;
+                                                        break;
+
+                                                    case 201472:
+                                                        int32 Unused<hidden=true>;
+                                                        int16 Animation<name="Animation String ID">;
+                                                        int16 Unused<hidden=true>;
+                                                        int32 Actor<name="Character Node ID (0=Player)">;
+                                                        break;
+                                                    case 131072:
+                                                        int32 ColorPart1 : 8<format=hex>;
+                                                        int16 ColorPart2<format=hex>;
+                                                        int16 Unused<hidden=true>;
+                                                        int16 Name<name="Name String ID">;
+                                                        int16 Unused<hidden=true>;
+                                                        int32 Speaker<name="Speaker Node ID">;
+                                                        break;
+                                                    case 66816:
+                                                        Toggle32 Complete:8<name="Completion",comment="Activates/Deactivates Scenario Completion">;
+                                                        int32 Unused<hidden=true>;
+                                                        StateChapter Chapter_State_ID<name="Chapter State ID">;
+                                                        uint16 Scenario_State_ID<name="Scenario State ID">;
+                                                        int32 Unused<hidden=true>;
+                                                        break;
+                                                    case 197376:
+                                                        int32 Unused<hidden=true>;
+                                                        StateChapter Chapter_State_ID<name="Chapter State ID",comment="Unknown use + unsure">;
+                                                        uint16 Scenario_State_ID<name="Scenario State ID",comment="Unknown use + unsure">;
+                                                        int32 Scenario2_Node_ID<name="Scenario2 Node ID",format=hex>;
+                                                        break;
+                                                    default:
+                                                        int32 Unk;
+                                                        int32 Unk;
+                                                        int32 Unk;
+                                                        break;
+                                                }
+
+                                            }refstruct<name="Ref Node",read=ReadRef>;
+                                        }
+                                    FSeek(stayref);
+                                }refdata<name="Ref Data",read=ReadRefT>;
+                            }
+                    }
+                FSeek(staystruc);
+            }structure<name="Data Node">;
+        }
+        }datanodes<read=j,name="Data 1">;
+    FSeek(AdditionalCoordPointer);
+    if (AdditionalCoordCount > 0)
+        {
+            struct AdditionalCoords{
+                local int b;
+                for ( b = 0; b < AdditionalCoordCount; b++)
+                    {
+                        struct AdditionalCoord{
+                            float X;
+                            float Y;
+                            float Z;
+                            int16 W;
+                            int16 Unk;
+                        }additionalcoord<name="Additional Coordinate">;
+                    }
+            }additionalcoords<name="Additional Coordinates", read=b>;
+        }
+    FSeek(TextPointerPointer);
+    if (TextCount > 0)
+        {
+            struct Text{
+                local int o;
+                for ( o = 0; o < TextCount; o++)
+                    {
+                        struct String{
+                            int32 TextPointer<hidden=true>;
+                            local int staytext = FTell();
+                            FSeek(TextPointer);
+                            char str[]<name="String">;
+                            FSeek(staytext);
+                        }strstring<name="String", read=str>;
+                    }
+            }text<name="Strings", read=o>;
+        }
+    FSeek(MSGPointer);
+        struct MsgData{
+            SetRandomBackColor();
+            int32 Data1NodeCount;
+            int32 MsgDataLength<format=hex>;
+        }msgdata;
+
+
+}msg;
+
+string ReadRef(RefStruct &r)
+{
+    local string null = "";
+    switch (r.Property)
+    {
+        case 209216:
+            return "Sound";
+        case 197632:
+            return "Teleportation";
+        case 201472:
+            return "Animation";
+        case 131072:
+            return "Speaker";
+        case 66816:
+            return "Scenario State Progress";
+        case 197376:
+            return "Launch Scenario2 Node";
+        default:
+            return "";
+    }
+};
+
+string ReadRefT(RefData &r)
+{
+    local string b="";
+    if (r.TextToggle==0)
+    {
+        return "";
+    }
+    else
+    {
+        return "Text";
+    }
+};
+
+string ReadInt1(IntFlags1 &r)
+{
+    local string null = "";
+    switch (r.Display)
+    {
+        case 0:
+            return "Enter";
+        case 1:
+            return "Exit";
+        case 2:
+            return "Look";
+        case 3:
+            return "Talk";
+        case 4:
+            return "Check";
+        case 5:
+            return "Get In";
+        case 6:
+            return "Listen";
+        case 7:
+            return "Pick Up";
+        case 8:
+            return "Collect";
+        case 9:
+            return "Setting";
+        case 10:
+            return "Harvest";
+        case 11:
+            return "Repair";
+        case 12:
+            return "Photograph";
+        case 13:
+            return "Heat Action";
+        case 14:
+            return "Jump";
+        case 15:
+            return "Stop";
+    }
+};
+
+string ReadInt2(IntFlags2 &r)
+{
+    local string null = "";
+    switch (r.AutoInteract)
+    {
+        case 1:
+            return "Auto On";
+        default:
+            return "Auto Off";
+    }
+};
+
+string ReadCondiNode(ConditionNode &r)
+{
+    local string null = "";
+    switch (r.Property)
+    {
+        case 32:
+            return "String (Action)";
+        case 39:
+            return "String (Character)";
+        default:
+            return "";
+    }
+}

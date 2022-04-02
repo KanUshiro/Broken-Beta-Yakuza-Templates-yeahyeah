@@ -1,0 +1,108 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+//
+//
+//
+//
+//
+//
+//
+//⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⣠⣾⣿⣿⣿⡿⣿⣿⣿⣿⡇⢠⣿⣿⣿⣿⣷⠸⣿⣿⣿⣿⣿⣿⣿⣿⣦⡘⢿⣿⣷⣆⠸⣷⣦⣿⣿⣿⣿⣿⣿⣿⣿
+//⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⣰⣿⣿⣿⣿⣿⠁⣿⡿⣿⣿⡇⣼⣿⣿⣿⣿⣿⡄⢿⣿⣿⣿⡀⢿⣿⣿⣿⣷⡈⢿⣿⣿⡆⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+//⣉⣩⣭⣙⣛⣛⠻⠿⡟⢰⣿⣿⣿⣿⣿⡏⢀⣿⠁⣿⣿⣇⣿⣿⣿⣿⣿⢿⣷⡈⣿⣿⣿⣷⠈⣿⣿⣿⣿⣷⡘⣿⣿⣷⠈⣿⣿⣿⣿⣿⣿⣿⣿⣿
+//⣿⣿⣿⣿⣿⣿⣿⡷⠀⣿⣿⣿⣿⣿⡟⠀⢸⣿⠀⣿⣿⣟⢻⣿⣿⣿⣿⠘⣿⣷⣽⣿⣿⣿⣧⡈⢿⣿⣿⣿⡇⢻⣿⣿⡇⢻⣿⣿⣿⣿⣿⣿⡿⠟
+//⣿⣿⣿⣿⣿⡿⢋⡄⢸⣿⣿⣿⣿⣿⡇⠀⢸⡏⠀⢹⣿⣿⠀⣿⣿⣿⣿⣧⠸⣿⣿⣿⠻⣿⣿⣷⣌⠻⣿⣿⣇⠈⣿⣿⣧⠸⣿⣿⣿⣿⣿⠋⠐⠄
+//⣿⣿⣿⣿⠟⣠⣾⡇⢸⣿⣿⡟⢻⣿⠀⠀⢸⡇⢸⠈⣿⣿⡆⠘⢿⣿⣿⣿⣆⠙⢿⣿⣦⡙⢿⣿⣿⣷⣿⣿⣿⠀⠘⣿⣿⠀⢻⣿⡿⠟⠁⠀⠀⠘
+//⣿⣿⡿⢃⣼⣿⣿⡇⢸⣿⣿⡇⢸⣿⠀⢸⡀⢧⢨⣅⠙⣿⣷⡀⠌⢻⣧⠹⢻⣆⠠⡙⠿⣿⣆⡛⢿⣿⣿⣌⠛⠀⠀⣿⣿⠀⠀⠀⡀⠀⠀⠀⠀⠀
+//⣿⡿⢡⣾⣿⣿⣿⣇⠸⣿⣿⣷⠘⣿⠀⣿⣷⡈⠈⣿⣷⡘⢿⠣⠀⣦⡙⢆⠀⠻⢷⡈⢶⣌⣙⠛⠦⠈⠛⠿⣷⣤⡀⠻⠏⠀⠀⢠⡇⠀⠀⠀⠀⠀
+//⡟⢠⣿⣿⣿⣿⣿⡟⠀⣿⣿⣿⡆⢻⡀⣿⣿⠟⠂⠙⠉⠛⢦⠅⠀⠈⠻⣶⣤⣀⠀⠀⣤⡽⠿⠋⠙⠒⠢⢴⣦⡄⢨⣥⠄⠀⢀⣼⣧⠀⠀⠀⠀⠀
+//⢠⣿⣿⣿⣿⣿⡟⠀⠀⠸⣿⣿⡇⠀⠃⠛⠀⣠⣶⣶⠶⣶⡀⡁⣽⣶⣼⣿⣿⣿⣿⣿⡋⢀⣤⡶⢶⣦⢠⡀⠘⠃⣾⠇⣄⢀⣾⣿⣿⠀⠀⠀⠀⠀
+//⣿⣿⣿⣿⣿⡏⠀⠀⣴⣧⠙⣿⣷⡈⡀⡀⢀⠹⡜⢿⣤⡾⢠⣿⣽⣿⣿⣿⣿⣿⣿⣿⣧⣿⠹⣧⣼⡿⢸⠏⡀⢰⠋⠈⣤⢸⣿⣿⣿⡆⠀⠀⠀⠀
+//⣿⣿⣿⣿⡟⠀⢀⣼⣿⠏⠀⠉⢿⣷⡀⠹⣿⣷⣬⣶⢐⢒⣭⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⣕⢂⡒⣲⣥⡾⠡⢣⠄⡆⡏⣼⣿⣿⣿⡇⠀⠀⠀⠀
+//⣿⣿⣿⡿⠀⢀⣾⣿⡟⠀⠀⠀⠀⠈⠛⢦⣘⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⢁⣴⠅⣪⢞⣼⣿⣿⣿⣿⣷⠀⠀⠀⠀
+//⣿⣿⣿⠁⢀⣾⣿⡿⠁⠀⠀⠀⠀⠀⠉⣲⠤⣭⣄⣤⣭⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⢛⣛⣵⣿⣿⣿⣿⣿⣿⣿⡀⠀⠀⠀
+//⣿⣿⡇⢀⣾⣿⣿⠁⠀⠀⠀⠀⠀⠀⢰⣿⣷⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢃⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀
+//⣿⣿⠀⣼⣿⣿⠏⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⡙⣿⣿⣿⣿⣿⣿⣭⣛⣻⣿⣛⣛⣽⣿⣿⣿⣿⣿⡿⣣⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀
+//⣿⡏⣸⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⣿⣿⣮⡻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣫⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀
+//⣿⣠⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣿⣿⣿⣶⣍⡻⢿⣿⣿⣿⣿⣿⣿⣿⡿⢟⣭⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀
+//⣿⣿⣿⣿⡏⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⢛⠻⠇⣴⣬⣙⡛⠛⢛⣋⣥⡆⠿⣋⡙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀
+//⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⣿⣿⣿⣿⣿⡘⣿⣶⣶⡜⠿⠻⣿⡿⠟⣵⣦⣾⡟⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀
+//⣿⣿⣿⡏⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⣿⡿⠿⠿⠿⠿⠿⠇⣿⣿⣿⣿⣿⣷⢈⣶⣶⣿⣿⡿⠰⠿⠿⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀
+//⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⠰⣿⣿⣿⣿⣿⣶⣶⣦⣙⠻⣿⣿⣾⣿⠛⣉⣴⣶⣶⣿⣿⣷⣶⣶⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀
+//⣿⣿⣿⠀⡈⠀⠀⠀⠀⠀⠀⠀⠿⠿⠿⠆⣿⣿⣿⣿⣿⣿⣿⣿⡿⠷⠈⢩⡍⠰⠾⣿⣿⣿⣿⣿⣿⣿⣿⡟⢸⢿⡿⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⡀
+//⣿⣿⡇⢠⠃⠀⠀⢠⣾⣿⡇⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⠿⠄⠀⢻⠇⠀⠀⠿⢟⣼⣿⣿⣿⣿⣿⠁⠀⠀⠀⣿⣿⣦⡹⣿⣿⣿⣿⣿⣿⡇
+//⣿⣿⠇⡾⠀⠀⢰⣿⢻⣿⠃⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣶⣶⡇⢰⡆⠹⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀⠀⠀⠀⣽⣏⢹⣷⢹⣿⣿⣿⣿⣿⣇
+//⣿⣿⣼⡇⠀⣠⣿⣿⢸⣿⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣿⣿⡟⠀⢸⡇⢀⠹⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⣿⣿⢸⣿⣦⡻⣿⣿⣿⣿⣿
+//⠿⣛⣙⢁⣾⠻⣿⡿⢸⣿⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⡿⠿⢋⣴⢡⣾⣷⢸⣦⡘⠿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⢸⣿⢸⣿⣿⢻⣎⣙⣛⡿⣿
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+if(function_exists(Str)==0){
+    if( MessageBox( idYes | idNo, 
+        "Caveman warning", 
+        "Version 12.0 of 010 Editor or above is required to run this template") 
+        == idYes ){
+
+        MessageBox( idOk,
+        "Good boy",
+        "https://www.sweetscape.com/download/");
+
+    }
+    else{
+        MessageBox( idOk,
+        "Caveman warning",
+        "We're no strangers to love");
+        MessageBox( idOk,
+        "Caveman warning",
+        "You know the rules and so do I");
+        MessageBox( idOk,
+        "Caveman warning",
+        "A full commitment's what I'm thinking of");
+        MessageBox( idOk,
+        "Caveman warning",
+        "You wouldn't get this from any other guy");
+        MessageBox( idOk,
+        "Caveman warning",
+        "I just wanna tell you how I'm feeling");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Gotta make you understand");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Never gonna give you up");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Never gonna let you down");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Never gonna run around and desert you");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Never gonna make you cry");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Never gonna say goodbye");
+        MessageBox( idOk,
+        "Caveman warning",
+        "Never gonna tell a lie and hurt you");
+    };
+    Exit(0);
+};

@@ -1,0 +1,43 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+local u32 headerColor = SetRandomBackColor();
+LittleEndian();
+enum<ubyte> team{
+    Invincible=0,
+    Player=1,
+    Goon=2,
+    Ally=3,
+    Boss=4,
+};
+
+FSeek(13716496);
+struct CtrlType{
+    local int i;
+    for ( i = 0; i < 127; i++ ){
+        struct CtrlNode{
+            SetRandomBackColor();
+            char CtrlName[32];
+            char JISString[32];
+            char ModelName[32];
+            char Weapon[36];
+            int16 Unk;
+            int16 Unk2;
+            ubyte Unk3;
+            ubyte Unk4;
+            team Team;
+            ubyte Unk5;
+            char UnkString[32];
+        }Ctrl<read=CtrlName, name="Ctrl_Type">;
+    }
+}ctrltype;

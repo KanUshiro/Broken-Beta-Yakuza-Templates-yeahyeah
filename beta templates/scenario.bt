@@ -1,0 +1,317 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: scenario*.bin // Old Engine // Y0, K1, Ishin, FOTNS, Y5, Y4 // maybe more in the future
+//   Authors: Kan#7925
+//   Version: 1.1
+//                Thanks to Parallax Error for a lot of help 
+//                Thanks to metman98uk for playing Princess League
+//                Thanks to Violet and Biggelskog
+//              
+//
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+#include "scenario_include.bt"
+local u32 headerColor = SetRandomBackColor();
+BigEndian();
+local uint EngineVer=ReadUInt(4);
+local uint Pointer56=ReadUInt(56);
+local uint Pointer64=ReadUInt(64);
+local int Version;
+if(Pointer56==Pointer64&&EngineVer==19){
+    Version=0; // 0, k1, ishin, fotns
+}
+else if(EngineVer==48){Version=2;} // y4
+else if(EngineVer==32){Version=3;} // y3
+else{Version=1;}; // y5
+
+struct Scenario2{
+    struct Header{
+        int32 Unused<hidden=true>;
+        if(Version==0 || Version==1){
+            int32 CategoryLeftoverCount<name="Category Count (leftover)",comment="Unused">;
+            int32 CategoryLeftoverPointer<name="Category Pointer (leftover)",comment="Unused",format=hex>;
+            int32 Unused<hidden=true>;
+            int32 Part1Count<name="Player Settings Node Count">;
+            int32 Part1Pointer<name="Player Settings Pointer">;
+            int32 Part2Count<name="Scenario Settings Node Count">;
+            int32 Part2Pointer<format=hex,name="Scenario Settings Node Pointer">;
+            int32 ScenarioCount<format=hex,name="Settings Size">;
+            int32 ScenarioPointer<format=hex,name="Settings Pointer">;
+            int32 Part4Count<name="Node Count">;
+            int32 Part4Pointer<format=hex,name="Node Pointer">;
+            int32 Part5Pointer<format=hex,name="Scenario Access Pointer">;
+            int32 Part5Count<name="Scenario Access Count">;
+            if(Version==1){ 
+                int32 Part6Pointer<format=hex,name="Scenario Branch Events Pointer">;
+                int32 Part6Count<name="Scenario Branch Events Count">;
+                int32 Part7Pointer<format=hex,name="Scenario Branch Nodes Pointer">;
+                int32 Part7Count<name="Scenario Branch Nodes Count">;}
+            else{
+                int32 StringPointer<format=hex,name="String Pointer">;
+                int32 Unused<hidden=true>;
+                int32 StringPointerRepeat<format=hex,name="String Pointer">;};
+        }
+        else{
+            u32 CategoryPointer<name="Category Pointer",format=hex>;
+            u32 CategoryCount<name="Category Count">;
+            u32 Part2Pointer<format=hex,name="Scenario Pointer">;
+            u32 Part2Count<name="Scenario Count">;
+            u32 Part4Pointer<format=hex,name="Chapter Pointer">;
+            u32 Part4Count<name="Chapter Count">;
+            u32 UnkPointer<format=hex>;
+            u32 UnkCount;
+        };
+    }header<name="Header">;
+    if(Version>1){
+        FSeek(header.CategoryPointer);
+        struct Categories{
+            local int i;
+            for(i=0;i<header.CategoryCount;i++){
+                struct Category{
+                    SetRandomBackColor();
+                    u32 P4Pointer<format=hex,name="Chapter Pointer">;
+                    u32 P4Count<name="Chapter Count">;
+                    u32 CategoryID<name="Category ID">;
+                    u32 Unused<hidden=true>;
+                    local int adele;
+                    local int messy=FTell();
+                    local uint ChapterSum=-1;
+                    local uint ScenarioSum=-1;
+                    FSeek(P4Pointer);
+                    for(adele=0;adele<P4Count;adele++){
+                        Chapter(adele,ChapterSum,ScenarioSum);
+                    };
+                    FSeek(messy);
+                }cat<name="Category",read=ReadCat>;
+            };
+        }categories<name="Scenario">;
+        
+        FSeek(header.UnkPointer);
+        struct UnkY4{
+            local int hello;
+            for(hello=0;hello<header.UnkCount;hello++){
+                    int32 Unk;
+            };
+        }unky4<name="Unk">;
+    }
+
+    else{
+        FSeek(header.Part4Pointer);
+            struct Part4{
+            local int c;
+            local uint ChapterSum=-1;
+            local uint ScenarioSum=-1;
+            for (c=0; c<header.Part4Count;c++)
+                {
+                    Chapter(c,ChapterSum,ScenarioSum);
+                };
+        }part4<name="Scenario",read=c>;
+    };
+
+}scenario2<name=NameThaFile,comment=CommentScenario,read=ReadScenario>;
+
+string NameThaFile(Scenario2 &r)
+{
+    if(Version<2){
+        return "scenario2.bin";
+    }
+    else{
+        return "scenario.bin";
+    };
+};
+string ReadXOR(Part6 &r)
+{
+    local string null = "";
+    SPrintf( null, "[%x] %s [%x]",
+        r.Node[0],
+        r.UnkString,
+        r.Node[1]);
+    return null;
+};
+
+string ReadInception(Inception &r)
+{
+    local string null = "";
+    SPrintf( null, "Node [%i]",
+        r.RggsWhy);
+    return null;
+};
+
+string ReadInception2(Inception2 &r)
+{
+    local string null = "";
+    if (r.Pointer2>0)
+        {
+            SPrintf( null, "Node [%i]",
+                r.RggsWhy);
+            return null;
+        }
+    else
+        {
+            return "None";
+        }
+};
+
+string ReadFollow(Follow &r)
+{
+    if (r.FPointer>0)
+        {
+            local string null = "";
+            SPrintf( null, "Node [%i]",
+                r.RggsWhy);
+            return null;
+        }
+    else
+        {
+            return "None";
+        }
+};
+string ReadHarukaF(HarukaFollow &r)
+{
+    if (r.Pointer2>0)
+        {
+            local string null = "";
+            SPrintf( null, "Node [%i]",
+                r.RggsWhy);
+            return null;
+        }
+    else
+        {
+            return "None";
+        }
+};
+
+string ReadHarukaC(HarukaChapter &r)
+{
+    local string null = "";
+    if (r.Pointer2>0)
+        {
+            SPrintf( null, "Node [%i]",
+                r.RggsWhy);
+            return null;
+        }
+    else
+        {
+            return "None";
+        }
+};
+string ReadChild(Child &r)
+{
+    local string null = "";
+    SPrintf( null, "Node [%i]",
+        r.RggsWhy);
+    return null;
+};
+string ReadKiryu(HarukaChild &r)
+{
+    local string null = "";
+    SPrintf( null, "Node [%i]",
+        r.RggsWhy);
+    return null;
+};
+
+string NameNode(Part4Node &r)
+{
+    if (r.NodeType==0){
+        local string null = "CHAPTER";
+        return null;
+    }
+    else if(r.NodeType==5){
+        local string null = "SCENARIO";
+        return null;
+    }
+    else if(r.NodeType==4){
+        local string null = "BRANCH EVENTS";
+        return null;
+    }
+    else{
+        local string lucky = "";
+        return lucky;
+    };
+};
+
+string ReadNode(Part4Node &r)
+{
+    local string null = "";
+    if (r.NodeType==4){
+        SPrintf( null, "[%x] %s [%x]",
+            r.cookie,
+            r.die,
+            r.cherry);
+        return null;
+    }
+    else{
+        SPrintf( null, "%s",
+            r.die);
+        return null;
+    }
+};
+
+string CommentNode(Part4Node &r)
+{
+    local string null = "";
+    if (r.NodeType==0&&Version<2){
+        SPrintf( null, "CHAPTER INDEX: %i",
+            r.ChapterIndex);
+        return null;
+    }
+    else if(r.NodeType==0&&Version>1){
+        return "";
+    }
+    else{
+        SPrintf( null, "CHAPTER INDEX: %i - SCENARIO INDEX: %i",
+            r.ScenarioChapIndex,
+            r.ScenarioIndex);
+    return null;
+    };
+};
+
+string CommentScenario(Scenario2 &r)
+{
+    //if(Version==1){
+        //return "This file is encoded in Shift_JIS";
+    //}
+    if(Version==0){
+        return "Y0/K1/FOTNS: UTF-8 // Ishin: Shift_JIS";
+    }
+    else{// if(Version==2 || Version==3){
+        return "This file is encoded in UTF-8";
+    };
+};
+
+string ReadScenario(Scenario2 &r)
+{
+    if(Version==1){
+        return "Yakuza 5";
+    }
+    else if(Version==0){
+        return "Old Engine";
+    }
+    else if(Version==2){
+        return "Yakuza 4";
+    }
+    else if(Version==3){
+        return "Yakuza 3";
+    };
+};
+
+string ReadEng(Y4Scenario &r)
+{
+    if(r.StringPointer2>0){
+        return r.String2;
+    }
+    else if(r.StringPointer>0){
+        return r.String;
+    }
+    else{
+        return "";
+    };
+};
+
+string ReadCat(Category &r){
+    local string null = "";
+    SPrintf( null, "CATEGORY ID: %i",
+        r.CategoryID);
+    return null;
+};

@@ -1,0 +1,98 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+local u32 headerColor = SetRandomBackColor();
+LittleEndian();
+
+struct Enum{
+    struct Header{
+        u32 Part5Pointer<format=hex>;
+        u32 Part5Count;
+        u32 Part6Pointer<format=hex>;
+        u32 Part6Count;
+        u32 Part7Pointer<format=hex>;
+        u32 Part7Count;
+    }header;
+
+    FSeek(header.Part5Pointer);
+    struct Part5{
+        local int a;
+        for (a=0;a<header.Part5Count;a++){
+            struct P5Node{
+                SetRandomBackColor();
+                u32 StringPointer;
+                local int stay5=FTell();
+                FSeek(StringPointer);
+                struct P5String{
+                    char String[];
+                }p5str<read=String,name="English String">;
+                FSeek(stay5);
+
+                u32 StringPointer2;
+                FSeek(StringPointer2);
+                struct P5String2{
+                    char String[];
+                }p5str2<read=String,name="Japanese String">;
+                FSeek(stay5+4);
+            }p5node<read=p5str.String,name="Scenario Enum">;
+        }
+    }part5<name="Scenario Enums">;
+
+    FSeek(header.Part6Pointer);
+    struct Part6{ 
+        local int b;
+        for (b=0;b<header.Part6Count;b++){
+            struct P6Node{
+                SetRandomBackColor();
+                u32 StringPointer;
+                local int stay6=FTell();
+                FSeek(StringPointer);
+                struct P6String{
+                    char String[];
+                }p6str<read=String,name="English String">;
+                FSeek(stay6);
+
+                u32 StringPointer2;
+                FSeek(StringPointer2);
+                struct P6String2{
+                    char String[];
+                }p6str2<read=String,name="Japanese String">;
+                FSeek(stay6+4);
+            }p6node<read=p6str.String,name="Timer Enum">;
+        }
+    }part6<name="Timers">;
+
+    FSeek(header.Part7Pointer);
+    struct Part7{ 
+        local int c;
+        for (c=0;c<header.Part7Count;c++){
+            struct P7Node{
+                SetRandomBackColor();
+                u32 StringPointer;
+                local int stay7=FTell();
+                FSeek(StringPointer);
+                struct P7String{
+                    char String[];
+                }p7str<read=String,name="English String">;
+                FSeek(stay7);
+
+                u32 StringPointer2;
+                FSeek(StringPointer2);
+                struct P7String2{
+                    char String[];
+                }p7str2<read=String,name="Japanese String">;
+                FSeek(stay7+4);
+            }p7node<read=p7str.String>;
+        }
+    }part7;
+}enume;

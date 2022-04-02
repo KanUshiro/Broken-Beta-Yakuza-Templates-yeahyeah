@@ -1,0 +1,193 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+local u32 headerColor = SetRandomBackColor();
+BigEndian();
+
+struct State{
+    struct Header{
+        u32 Part1Count;
+        u32 Part1Pointer<format=hex>;
+        u32 Part2Count;
+        u32 Part2Pointer<format=hex>;
+        u32 Part3Count;
+        u32 Part3Pointer<format=hex>;
+        u32 Part4Count;
+        u32 Part4Pointer<format=hex>;
+        u32 Part5Count;
+        u32 Part5Pointer<format=hex>;
+        u32 Part6Count;
+        u32 Part6Pointer<format=hex>;
+        u32 Part7Count;
+        u32 Part7Pointer<format=hex>;
+        u32 Part8Count;
+        u32 Part8Pointer<format=hex>;
+    }header;
+    
+
+    FSeek(header.Part2Pointer);
+    struct Part2{
+        local int c;
+        for(c=0;c<header.Part2Count;c++){
+            struct P2Node{
+                SetRandomBackColor();
+                u32 P2Pointer;
+                u16 P2Size;
+                u16 Unused<hidden=true>;
+                local int stayp2=FTell();
+                FSeek(P2Pointer);
+                struct P2Part2{
+                    local int b;
+                    for(b=0;b<P2Size;b++){
+                        struct P2Flag{
+                            u16 Chapter;
+                            u8 Unk1;
+                            u8 Unk2;
+                        }p2flag<read=Chapter>;
+                    }
+                }p2p2;
+                FSeek(stayp2);
+            }p2node<read=P2Size>;
+        }
+    }part2<name="Save Data or Achievements?">;
+
+    FSeek(header.Part3Pointer);
+    struct Part3{
+        local int a;
+        for(a=0;a<header.Part3Count;a++){
+            struct P3Node{
+                SetRandomBackColor();
+                u32 StringPointer;
+                u32 Unk;
+                local int stay3=FTell();
+                FSeek(StringPointer);
+                struct P3String{
+                    char String[];
+                }p3str<read=String>;
+                FSeek(stay3);
+            }p3node<read=p3str.String>;
+        }
+    }part3<name="Timers">;
+
+    FSeek(header.Part4Pointer);
+    struct Part4{
+        local int d;
+        for(d=0;d<header.Part4Count;d++){
+            struct P4Node{
+                SetRandomBackColor();
+                u32 StringPointer;
+                local int stay4=FTell();
+                FSeek(StringPointer);
+                struct P4String{
+                    char String[];
+                }p4str<read=String>;
+                FSeek(stay4);
+                u32 Unk;
+                u32 Unk;
+            }p4node<read=p4str.String>;
+        }
+    }part4;
+
+    FSeek(header.Part5Pointer);
+    struct Part5{
+        local int e;
+        for(e=0;e<header.Part5Count;e++){
+            struct P5Node{
+                SetRandomBackColor();
+                u16 Chapter;
+                u16 Scenario;
+                local int CS=Chapter+Scenario;
+            }p5node<name="Scenario Enum",read=CS>;
+        }
+    }part5<name="Scenario Enums">;
+
+    FSeek(header.Part6Pointer);
+    struct Part6{
+        local int f;
+        for(f=0;f<header.Part6Count;f++){
+            struct P6Node{
+                SetRandomBackColor();
+                u16 TimerID;
+                u16 Unused<hidden=true>;
+            }p6node<name="Timer Enum">;
+        }
+    }part6<name="Timer Controllers">;
+
+    FSeek(header.Part7Pointer);
+    struct Part7{
+        local int g;
+        for(g=0;g<header.Part7Count;g++){
+            struct P7Node{
+                SetRandomBackColor();
+                u16 Part4NodeID;
+                u16 Unused<hidden=true>;
+            }p7node;
+        }
+    }part7<name="Part 4 Enums">;
+
+    FSeek(header.Part8Pointer);
+    local int v=0; //acts as replacer for rggs count, easier like that
+    struct Part8{
+        local int h;
+        for(h=0;h<header.Part8Count;h++){
+            struct P8Node{
+                SetRandomBackColor();
+                u32 StringPointer;
+                local int stay8=FTell();
+                FSeek(StringPointer);
+                struct P8String{
+                    char String[];
+                }p8str<read=String>;
+                FSeek(stay8);
+                u16 PreviousStringCount; // = v
+                u16 P1Count;
+                if (P1Count>0){
+                    struct P8P1{
+                        local int wow;
+                        for(wow=0;wow<P1Count;wow++){
+                            FSeek(header.Part1Pointer+v*44);
+                            struct P8P1Node{
+                                SetRandomBackColor();
+                                u32 StringPointer<format=hex>;
+                                local int stay=FTell();
+                                FSeek(StringPointer);
+                                char String[];
+                                FSeek(stay);
+                                u32 StringCount;
+                                u32 StringPointerPointer<format=hex>;
+                                if(StringPointerPointer>0){ // no additional string pointer for stages only afaik
+                                    FSeek(StringPointerPointer);
+                                    struct P1Strings{
+                                        local int j;
+                                        for(j=0;j<StringCount;j++){
+                                            u32 StringPointer2;
+                                            FSeek(StringPointer2);
+                                            struct P1String{
+                                                char String2[];
+                                            }p1str<read=String2>;
+                                            FSeek(StringPointerPointer+(j+1)*4);
+                                        }
+                                    }p1strings;
+                                }
+                                FSeek(stay+8);
+                                u32 Unk[8];
+                                v++;
+                            }p8p1node<read=String>;
+                            FSeek(stay8+4);
+                        }
+                    }p8p1;
+                }
+            }p8node<read=p8str.String>;
+        }
+    }part8<read=state.v>;
+}state;

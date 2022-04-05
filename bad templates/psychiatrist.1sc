@@ -1,0 +1,60 @@
+local int i;
+local uint32 professionalresponse;
+local string a = "Psychiatrist";
+local string mentallyill;
+local int32 hethinksheisagirl;
+void ExpertOpinion(string b){
+    mentallyill = InputString(a,b,"");
+};
+void HangUp(){
+    MessageBox(idOk,
+        a,
+        "Welp, that was a good session. See you next week.");
+};
+
+ExpertOpinion("Hello! How are you feeling today?");
+for(i=0;i<15;i++){
+    hethinksheisagirl = Strstr(mentallyill,"trans");
+    if(hethinksheisagirl>=0){
+        HangUp();
+        return;
+    }
+    else if(mentallyill == ""){
+        MessageBox(idOk,
+            a,
+            "Don't forget to pay me for my time. See you next week.");
+        return;
+    };
+    professionalresponse=Random(9);
+    switch(professionalresponse){
+        case 0:
+            ExpertOpinion("Yes.");
+        break;
+        case 1:
+            ExpertOpinion("No.");
+        break;
+        case 2:
+            ExpertOpinion("You have depression.");
+        break;
+        case 3:
+            ExpertOpinion("Let me prescribe you some Zoloft.");
+        break;
+        case 4:
+            ExpertOpinion("You're just doing it to rebel.");
+        break;
+        case 5:
+            ExpertOpinion("Ho Ho Ho!");
+        break;
+        case 6:
+            ExpertOpinion("True, that is a problem indeed.");
+        break;
+        case 7:
+            ExpertOpinion("Has your mental health improved since last time I listened to your issues and didn't provide help?");
+        break;
+        case 8:
+            ExpertOpinion("Blurgh.");
+        break;
+    };
+};
+
+HangUp();

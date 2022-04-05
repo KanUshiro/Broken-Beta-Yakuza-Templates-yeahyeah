@@ -1,0 +1,278 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: cuesheet.bt
+//   Authors: Kan#7925
+//   Version: 1.0
+//   Purpose: oe acb. run on cuesheet.bin before runnign script cuesheet.1sc
+//  Category: cuesheet.bin
+// File Mask: cshb
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+local u32 headerColor = SetRandomBackColor();
+BigEndian();
+enum<int32> Toggle
+{
+False = 0,
+True = 1,
+};
+
+enum<uint16> category
+{
+console	,
+step_walk	,
+step_run	,
+step_down	,
+step_bullet	,
+step_common	,
+step_dancer	,
+step_sp	,
+step	,
+haichi	,
+hact	,
+battle_common	,
+chase_common	,
+btl_common_voice	,
+battle_se	,
+btl_voice	,
+btl_help	,
+btl_loser	,
+btl_enc	,
+reload_se	,
+etc	,
+boss_se	,
+longbtl_sub	,
+adventure_common	,
+adv_common_voice	,
+btl_stage	,
+stage	,
+gaya	,
+stalker	,
+weather	,
+haruka_onedari	,
+sidest_taxi_common	,
+minig_snowmobile_common	,
+minig_snowmobile_voice	,
+snowmobile_voice	,
+minig_voice	,
+minig_karaoke	,
+minig_batting	,
+ming	,
+auth_movie	,
+auth	,
+caba_se	,
+caba	,
+adv_add_mng_ufo	,
+adv_add_chase_cmn	,
+adv_add_chase_p_voice	,
+adv_add_chase_e_voice	,
+other_se	,
+other_stream	,
+ambbase	,
+amb	,
+btlbgm	,
+usen	,
+system	,
+speech_caba	,
+kaiwabgm	,
+talk	,
+enc01_revile	,
+enc02_dec	,
+battle_caption	,
+fighter	,
+chaser	,
+navi	,
+reaction	,
+equip	,
+enc10_loser	,
+sidest_taxi_city	,
+sidest_taxi_race_p_engine	,
+sidest_taxi_race_e_engine	,
+sidest_taxi_race	,
+sidest_yukiyama_amb	,
+sidest_yukiyama_common	,
+sidest_yukiyama_oroshi_btl	,
+sidest_yukiyama_saejima_voice	,
+sidest_yukiyama_yuki	,
+btlgaya	,
+adv_player	,
+vehicle_train	,
+vehicle_car	,
+scene	,
+enc00_call	,
+minig_vf2_common	,
+drive_common	,
+advbgm	,
+bullet_hit	,
+weakpoint_hit	,
+sidest_princess_common	,
+sstory_dance	,
+sstory_idolbtl_inst	,
+sstory_idolbtl	,
+btllong_enc	,
+enc03_lost	,
+minig_dance	,
+tsukkomi_voice	,
+hockey_voice	,
+printclub_voice	,
+taiko_voice	,
+arena_win	,
+arena_m_name	,
+arena_name	,
+arena_plg01	,
+arena_plg02	,
+arena_vs	,
+arena	,
+eat	,
+ramen_voice	,
+taxi_bgm	,
+dancer	,
+temp	,
+haruka_menu	,
+sp_arm	,
+princess_audience	,
+taxi_city	,
+taxi_racer	,
+mng_shooting3_amb	,
+minig_shooting3_st	,
+minig_shooting3_amb	,
+minig_quiz_common	,
+adv_caba_se	,
+adv_caba	,
+baseball	,
+eeyan_common	,
+minig_golf_training_voice	,
+taxi_talker	,
+taxi_walker	,
+signal	,
+siren_police	,
+gohoubi_billiard	,
+gohoubi_darts	,
+roulette_voice	,
+start	,
+karaoke_inst	,
+slip	,
+instance	,
+champagne	,
+vehicle_bus	,
+vehicle	,
+speech	,
+c3_670	,
+minig_shooting3	,
+karaoke_vo	,
+karaoke_vas	,
+sidest_yukiyama	,
+food	,
+arm	,
+minig_prize	,
+minig_bgm_prize03	,
+wanderer	,
+hact_arm	,
+se	,
+bgm	,
+movie	,
+master	,
+stream_range_bgm0	,
+stream_range_bgm1	,
+stream_range_bgm2	,
+stream_range_usen	,
+hact_p_voice	,
+hact_cab_voice	,
+hact_arm_volume	,
+se_amb	,
+other_bgm	,
+arm_kind	,
+guard	,
+arm_left	,
+arm_right	,
+step_dash	,
+step_turn	,
+step_stop	,
+arm_bullet	,
+equip_bullet	,
+chsbgm	,
+bbg	,
+enc11_tamuro	,
+btl_cheer	,
+nare	,
+haichi_amb	,
+adv_mot	,
+wdr_loud	,
+wdr_to_player	,
+wdr_talk	,
+wdr_gaya	,
+wdr_whisper	,
+narebgm	,
+minig_nichibu	,
+btllong_other	,
+another_se	,
+nichibu_game	,
+telecom	,
+ingame_common	,
+enc12_blackmail	,
+enc13_friend	,
+style	,
+minig_teleclub_voice	,
+enc14_sense	,
+step_wdrwalk	,
+seqse	,
+carchase_common	,
+adv_animal_mot	,
+poke_machine	,
+minig_caba_voice	,
+pokecir_live	,
+minig_pokecir_voice	,
+minig_dance_voice	,
+minig_cat_voice	,
+carchase_heateye	,
+carchase_voice	,
+haichi_tape	,
+wdr_caption	,
+image_movie	,
+hbg	,
+walkman	,
+minig_teleclub_gaya	,
+haichi_song	,
+advsubbgm	,
+kaiwabgm_sub	,
+auth_amb	,
+wdr_evenc	,
+};
+
+struct Cuesheet{
+    char Magic[4];
+    u16 EndianCheck <format=hex>;
+    u16 Unused<hidden=true>;
+    u16 FileVersion;
+    u16 Unused<hidden=true>;
+    u32 Unused<hidden=true>;
+    local int c;
+
+    if(Magic=="cshb"){ //cuesheet.bin
+        u32 ACBCount<name="ACB Count">;
+        u32 Unused1[3]<hidden=true>;
+
+        for (c=0;c<ACBCount;c++){
+            struct ACB{
+                SetRandomBackColor();
+                u16 ACBName <format=hex,name="ACB Name">;
+                category Category <name="Category">;
+                u32 Size : 24 <name="Size (Informative)">; //size does not affect the game at all
+                u32 Unused : 4 <hidden=true>;
+                Toggle IsValid : 1 <name="ACB is valid">;
+                Toggle Unk1 : 1 <name="Unk">;
+                Toggle HasMfp : 1 <name="Has .mfp file (subtitles)">;
+                Toggle HasAwb : 1 <name="Has .awb file">;
+            }acb<name="ACB",read=readacb>;
+        }
+    }
+}cuesheet<name="Cuesheet">;
+
+string readacb(ACB &r){
+    local string str = "";
+    SPrintf(str,"%x",
+        r.ACBName);
+    return str;
+};

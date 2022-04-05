@@ -1,0 +1,72 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Script File
+//
+//      File: cuesheet.1sc
+//   Authors: Kan
+//   Version: 1.0
+//   Purpose: add/delete acb. use with cuesheet.bt
+//  Category: 
+//   History: 
+//------------------------------------------------
+RequiresFile();
+BigEndian();
+if(exists(cuesheet)==false){
+    local string tempnotdef = "Template cuesheet.bt must be ran on file first.";
+    Warning(tempnotdef);
+    return tempnotdef;
+};
+void BadValue(u32 userinput){
+    if(userinput==BAD_VALUE){
+        Printf("Script cancelled.");
+        Exit(0);
+    };
+};
+void SetACBCount(u32 count){
+    cuesheet.ACBCount += count;
+};
+
+local u32 i;
+local u32 insertaddress = FileSize();
+local char templatename[] = GetTemplateFileName();
+local u32 whatdo = InputRadioButtonBox("Cuesheet","",2,"Add ACB","Delete ACB");
+local u32 scacbcount = InputNumber("Cuesheet","Number of ACBs to add/delete","1");
+BadValue(scacbcount);
+
+if(whatdo==1){
+    local u32 nodeindex=InputNumber("Cuesheet","Start from ACB index:","");
+    if(nodeindex<0 || nodeindex>=cuesheet.ACBCount){
+        MessageBox( idCancel,
+        "Error",
+        "ACB[%i] does not exist.", nodeindex);
+        Exit(0);
+    }
+    else if(nodeindex+scacbcount>cuesheet.ACBCount){
+        MessageBox( idCancel,
+        "Error",
+        "ACB amount too big.");
+        return;
+    };
+    for(i=nodeindex;i<scacbcount+nodeindex;i++){
+        DeleteBytes(startof(cuesheet.acb[i].ACBName),8);
+    };
+    SetACBCount(-scacbcount);
+}
+
+else{
+    if(scacbcount>cuesheet.ACBCount){
+        MessageBox( idCancel,
+        "Error",
+        "ACB amount too big.");
+        return;
+    };
+    local u32 inpcat = InputNumber("Cuesheet","Pick category ID","10");
+    BadValue(inpcat);
+    for(i=0;i<scacbcount;i++){  
+        WriteShort(insertaddress+i*8,cuesheet.acb.ACBName+1+i);
+        WriteShort(insertaddress+2+i*8,inpcat);
+        WriteByte(insertaddress+7+i*8,8);
+    };
+    SetACBCount(scacbcount);
+};
+
+RunTemplate(templatename,false);

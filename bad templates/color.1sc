@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Script File
+//
+//      File: color.1sc
+//   Authors: Kan
+//   Version: 1.0
+//   Purpose: add models to COLOR.bin
+//  Category: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+RequiresFile();
+BigEndian();
+u32 i;
+u16 count1 = ReadShort(18);
+u16 count2 = ReadShort(22);
+u32 filesize = FileSize();
+u32 whatdo = InputRadioButtonBox("COLOR","",0,"Add Model","Delete Model");
+void BadValue(u32 userinput){
+    if(userinput==BAD_VALUE){
+        Printf("Script cancelled.");
+        Exit(0);
+    };
+};
+u32 nodecount = InputNumber("COLOR","How many?","");
+BadValue(nodecount);
+void SetCount(u32 nodecount){
+    WriteShort(18,count1+nodecount);
+    WriteShort(22,count2+nodecount);
+};
+
+if(whatdo==1){
+    u32 offset = InputNumber("COLOR","Start from offset:","");
+    if(offset<32 || offset>=filesize){
+        MessageBox( idCancel,
+        "Error",
+        "Offset does not exist or includes the header.");
+        Exit(0);
+    }
+    else if(offset+nodecount*8>filesize){
+        MessageBox( idCancel,
+        "Error",
+        "Amount of bytes to delete is bigger than the file.");
+        return;
+    }
+    for(i=0;i<nodecount;i++){
+        DeleteBytes(offset,8);
+    };
+    SetCount(-nodecount);
+}
+else{
+    for(i=0;i<nodecount;i++){
+        WriteShort(filesize + i*8 , count1 + i + 1);
+        WriteShort(filesize + 2 + i*8 , 256);
+        WriteShort(filesize + 6 + i*8 , count2 + i + 1);
+    };
+};

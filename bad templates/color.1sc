@@ -54,4 +54,5 @@ else{
         WriteShort(filesize + 2 + i*8 , 256);
         WriteShort(filesize + 6 + i*8 , count2 + i + 1);
     };
+    SetCount(nodecount);
 };

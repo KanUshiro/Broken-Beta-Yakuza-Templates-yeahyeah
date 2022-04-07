@@ -3,7 +3,7 @@
 //
 //      File: cuesheet.1sc
 //   Authors: Kan
-//   Version: 1.0
+//   Version: 1.1
 //   Purpose: add/delete acb. use with cuesheet.bt
 //  Category: 
 //   History: 
@@ -46,9 +46,7 @@ if(whatdo==1){
         "ACB amount too big.");
         return;
     };
-    for(i=nodeindex;i<scacbcount+nodeindex;i++){
-        DeleteBytes(startof(cuesheet.acb[i].ACBName),8);
-    };
+    DeleteBytes(startof(cuesheet.acb[nodeindex].ACBName),8*scacbcount);
     SetACBCount(-scacbcount);
 }
 

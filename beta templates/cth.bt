@@ -1,0 +1,276 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: cth.bt
+//   Authors: Kan
+//   Version: 1.0
+//   Purpose: making sense of this bad format
+//  Category: cbt
+// File Mask: 
+//  ID Bytes: 
+//   History: i prefer geography but thanks
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+local u32 headerColor = SetRandomBackColor();
+BigEndian();
+local u32 i;
+local u32 violetloop;
+
+struct Cloth{
+    struct Header{
+        char Magic[4]<name="Magic">;
+        u32 EndianCheck<name="Endian Check",format=hex>;
+        u32 Version<name="Version">;
+        u32 Size<name="Size">;
+        u8 Unk1;
+        u8 Unk2;
+        u16 Unused<hidden=true>;
+        u16 ColumnCount<name="Column Vertex Count">;
+        u16 RowCount<name="Row Vertex Count">;
+        u32 TexCount<name="Texture Count">;
+        u32 TexPointer<format=hex,name="Texture Pointer">;
+        u32 BoneCount<name="Node Count">;
+        u32 BonePointer<format=hex,name="Node Pointer">;
+        u32 VerticesCount<name="Vertex Count">;
+        u32 VerticesPointer<format=hex,name="Vertex Pointer">;
+        u32 Colli1Count<name="Constraints Count [1]">;
+        u32 Colli1Pointer<format=hex,name="Constraints Pointer [1]">;
+        u32 Colli2Count<name="Constraints Count [2]">;
+        u32 Colli2Pointer<format=hex,name="Constraints Pointer [2]">;
+    }header<name="Header">;
+
+    struct Shader{
+        SetRandomBackColor();
+        u16 Checksum<name="Checksum">;
+        char ShaderName[30]<name="Shader Name">;
+        struct TextureIndexes{
+            struct Di{
+                u16 Diffuse<name="Diffuse">;
+                local string texname = ReadLine(header.TexPointer+32*Diffuse+2);
+            }di<name="Diffuse",read=texname>;
+            struct Rf{
+                u16 Refl<name="Refl">;
+                local string texname = ReadLine(header.TexPointer+32*Refl+2);
+            }refl<name="Refl",read=texname>;
+            struct Mt{
+                u16 Multi<name="Multi">;
+                local string texname = ReadLine(header.TexPointer+32*Multi+2);
+            }mt<name="Multi",read=texname>;
+            struct Spec{
+                u16 Specular<name="Specular">;
+                local string texname = ReadLine(header.TexPointer+32*Specular+2);
+            }spec<name="Specular",read=texname>;
+            struct Rs{
+                u16 Rs<name="Rs">;
+                local string texname = ReadLine(header.TexPointer+32*Rs+2);
+            }rs<name="Rs",read=texname>;
+            struct Tn{
+                u16 Normal<name="Normal">;
+                local string texname = ReadLine(header.TexPointer+32*Normal+2);
+            }tn<name="Normal",read=texname>;
+            struct Rttex{
+                u16 Rt<name="Rt">;
+                local string texname = ReadLine(header.TexPointer+32*Rt+2);
+            }rt<name="Rt",read=texname>;
+            struct Rdtex{
+                u16 Rd<name="Rd">;
+                local string texname = ReadLine(header.TexPointer+32*Rd+2);
+            }rd<name="Rd",read=texname>;
+        }textureindexes<name="Texture Indices">;
+        struct MatData{
+            struct Unk1{
+                u8 Unk1;
+                u8 Unk1;
+                u8 Unk1;
+                u8 Unk1;
+                local string readu;
+                SPrintf( readu, "[%i, %i, %i, %i]",Unk1[0],Unk1[1],Unk1[2],Unk1[3]);
+            }unk1<read=readu,name="Unk1">;
+            struct Sp{
+                u8 Red;
+                u8 Green;
+                u8 Blue;
+                local string reads;
+                SPrintf( reads, "[%i, %i, %i]",Red,Green,Blue);
+            }sp<read=reads,name="Specular">;
+            u8 Padding;
+            struct Diff{
+                u8 Red;
+                u8 Green;
+                u8 Blue;
+                local string readd;
+                SPrintf( readd, "[%i, %i, %i]",Red,Green,Blue);
+            }diff<read=readd,name="Diffuse">;
+            u8 Opacity;
+            struct Unk2{
+                u8 Unk2;
+                u8 Unk2;
+                u8 Unk2;
+                u8 Unk2;
+                local string readuu;
+                SPrintf( readuu, "[%i, %i, %i, %i]",Unk2[0],Unk2[1],Unk2[2],Unk2[3]);
+            }unk2<read=readuu,name="Unk2">;
+        }matdata<name="Material Data">;
+        float AttributeSet1[16]<name="Attribute Set Floats 1">;
+        float AttributeSet2[16]<name="Attribute Set Floats 2",comment="Unk 12 Field in Blender">;
+    }shader<read=ShaderName,name="Material">;
+
+    FSeek(header.TexPointer);
+    struct Tex{
+        for(i=0;i<header.TexCount;i++){
+            struct Texture{
+                SetRandomBackColor();
+                u16 Checksum<name="Checksum">;
+                char TextureName[30]<name="Texture Name">;
+            }texture<read=TextureName,name="Texture">;
+        };
+        local int t=i;
+    }tex<read=t,name="Textures">;
+
+    FSeek(header.BonePointer);
+    struct Bones{
+        for(i=0;i<header.BoneCount;i++){
+            struct Bone{
+                SetRandomBackColor();
+                u16 Checksum<name="Checksum">;
+                char BoneName[30]<name="Name">;
+                s32 ParentIndex<name="Parent Index">;
+                s32 ChildIndex<name="Child Index">;
+                s32 SiblingIndex<name="Sibling Index">;
+                s32 Unused<hidden=true>;
+                struct LocPos{
+                    float X;
+                    float Y;
+                    float Z;
+                    float W;
+                    local string readbl;
+                    SPrintf( readbl, "[%f, %f, %f, %f]",X,Y,Z,W);
+                }locpos<name="Local Position",read=readbl>;
+                struct LocRot{
+                    float X;
+                    float Y;
+                    float Z;
+                    float W;
+                    local string readbr;
+                    SPrintf( readbr, "[%f, %f, %f, %f]",X,Y,Z,W);
+                }locrot<name="Local Rotation",read=readbr>;
+                struct LocScale{
+                    float X;
+                    float Y;
+                    float Z;
+                    float W;
+                    local string readls;
+                    SPrintf( readls, "[%f, %f, %f, %f]",X,Y,Z,W);
+                }locscale<name="Local Scale",read=readls>;
+            }bone<name=BoneName>;
+        };
+        local int r=i;
+    }bones<read=r,name="Nodes">;
+
+    FSeek(header.VerticesPointer);
+    struct Vertices{
+        for(i=0;i<header.VerticesCount;i++){
+            struct Vert{
+                SetRandomBackColor();
+                float X;
+                float Y;
+                float Z;
+                u32 UnkBlank[3]<hidden=true>;
+                u8 Faces[4];
+                u32 BoneColCount<name="Bone Map Count">;
+                    for(violetloop=0;violetloop<BoneColCount;violetloop++){
+                        struct BnCli{
+                            float Weights;
+                            u32 BoneIndex<name="Bone Index">;
+                            local string BoneName = ReadLine(header.BonePointer+2+96*BoneIndex);
+                        }bncli<name=BoneName,read=Weights>;
+                    };
+                    u64 hello[4-BoneColCount]<hidden=true>;
+                struct UVMap{
+                    float Uprevrow<name="U [Previous Row]">; //assumed
+                    float Vprevrow<name="V [Previous Row]">; //assumed
+                    u32 g[6]<hidden=true>;
+                    float Uprevcolumn<name="U [Previous Column]">;
+                    float Vprevcolumn<name="V [Previous Column]">;
+                    u32 a[6]<hidden=true>;
+                    float Unextcolumn<name="U [Next Column]">; //assumed
+                    float Vnextcolumn<name="V [Next Column]">; //assumed
+                    u32 y[6]<hidden=true>;
+                    float Unextrow<name="U [Next Row]">;
+                    float Vnextrow<name="V [Next Row]">;
+                    u32 z[6]<hidden=true>;
+                }uvmap<name="UV Map",read=ReadUV>;
+
+                local string readv;
+                SPrintf( readv, "[%f, %f, %f]",X,Y,Z);
+                local float comment = X+Z;
+            }vert<name="Vertex",read=readv,comment=comment>;
+        };
+        local int a=i;
+        local string meshname = ReadLine(header.BonePointer + ( header.BoneCount - 1 ) * 96 + 2);
+        local string nameprint;
+        SPrintf( nameprint, "Mesh: [%s]", meshname);
+    }vertices<read=a,name=nameprint>;
+
+    FSeek(header.Colli1Pointer);
+    struct Colli1{
+        for(i=0;i<header.Colli1Count;i++){
+            struct Cl1{
+                SetRandomBackColor();
+                float X;
+                float Y;
+                float Z;
+                local string readcl;
+                SPrintf( readcl, "[%f, %f, %f]",X,Y,Z);
+                FSkip(4);
+            }cl1<read=readcl,name="Vertex Constraint">;
+        };
+        local int n=i;
+        local string constraintname = ReadLine(header.BonePointer + ( header.BoneCount - 2 ) * 96 + 2);
+        local string nameprint;
+        SPrintf( nameprint, "Constraint: [%s]", constraintname);
+    }colli1<read=n,name=nameprint>;
+
+    FSeek(header.Colli2Pointer);
+    struct Colli2{
+        for(i=0;i<header.Colli2Count;i++){
+            struct Cl2{
+                SetRandomBackColor();
+                float X;
+                float Y;
+                float Z;
+                local string readcl;
+                SPrintf( readcl, "[%f , %f, %f]",X,Y,Z);
+                FSkip(4);
+            }cl2<read=readcl,name="Vertex Constraint">;
+        };
+        local int s=i;
+        local string constraintname = ReadLine(header.BonePointer + ( header.BoneCount - 3 ) * 96 + 2);
+        local string nameprint;
+        SPrintf( nameprint, "Constraint: [%s]", constraintname);
+    }colli2<read=s,name=nameprint>;
+}cth<name="cth">;
+
+void ReadColli(float X,float Y,float Z){
+    local string rcol = "[%f,%f,%f]",X,Y,Z;
+};
+
+string ReadUV (UVMap &r){
+    local u32 Faces;
+    if (r.Uprevrow != 0){
+        Faces++;
+    };
+    if (r.Uprevcolumn != 0){
+        Faces++;
+    };
+    if (r.Unextcolumn != 0){
+        Faces++;
+    };
+    if (r.Unextrow != 0 ){
+        Faces++;
+    };
+    local string str = "";
+    SPrintf(str,"%i Face(s)",
+        Faces);
+    return str;
+};

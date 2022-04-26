@@ -1,0 +1,29 @@
+RequiresFile();
+local u32 i;
+local char texturename[] = InputString ("Add texture", "Texture name:","");
+local u32 length = Strlen(texturename) + 1;
+local u32 stringaddress = startof(texture.pointers.pointer.String) + Strlen(texture.pointers.pointer.String) + 1;
+local u32 pointeraddress = startof(texture.pointers.pointer.StrPointer) + 4 + length;
+local u32 unk1address = startof(texture.pointers.pointer.Unk1) + 8 + length;
+local u32 unkPaddress = startof(texture.pointers.pointer.unkPointer) + 12 + length;
+if(texturename == ""){
+    Printf("Script cancelled.");
+    return;
+};
+
+
+for(i=0;i<texture.StringCount;i++){
+    if(texture.pointers.pointer[i].unkPointer>0){
+        texture.pointers.pointer[i].unkPointer+=length+12;
+    };
+};
+texture.StringCount++;
+texture.PointerPointer+=length;
+texture.Pointer1+=length+4;
+texture.Pointer2+=length+8;
+InsertBytes(stringaddress,length,0);
+InsertBytes(pointeraddress,4,0);
+InsertBytes(unk1address,4,0);
+InsertBytes(unkPaddress,4,0);
+WriteString(stringaddress,texturename);
+WriteInt(pointeraddress,stringaddress);

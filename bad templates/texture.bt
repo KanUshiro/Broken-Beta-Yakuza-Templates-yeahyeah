@@ -1,0 +1,52 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+BigEndian();
+local u32 i;
+local u32 headerColor = SetRandomBackColor();
+local u32 stay;
+
+struct Texture{
+    char Magic[4];
+    u32 EndianCheck<format=hex,name="Endian Check">;
+    u32 gay[2]<hidden=true>;
+    u32 StringCount<name="Texture Count">;
+    u32 PointerPointer<format=hex,name="Pointers">;
+    u32 Pointer1<format=hex,name="Pointer to Unk1">;
+    u32 gayz[3]<hidden=true>;
+    u32 Pointer2<format=hex,name="Pointer to Unk2">;
+    u32 yea<hidden=true>;
+    FSkip(32);
+
+    FSeek(PointerPointer);
+    struct Pointers{
+        for(i=0;i<StringCount;i++){
+            struct Pointer{
+                SetRandomBackColor();
+                u32 StrPointer<format=hex,name="String Pointer">;
+                stay = FTell();
+                FSeek(StrPointer);
+                char String[];
+                FSeek(Pointer1+i*4);
+                u8 Unk1[4];
+                FSeek(Pointer2+i*4);
+                u32 unkPointer<format=hex>;
+                if(unkPointer > 0){
+                    FSeek(unkPointer);
+                    u32 Unk2;
+                };
+                FSeek(stay);
+            }pointer<read=String>;
+        };
+    }pointers;
+}texture<name="texture.bin">;

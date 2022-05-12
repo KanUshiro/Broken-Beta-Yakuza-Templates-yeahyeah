@@ -13,7 +13,7 @@ local u32 i;
 local u32 nodeindex;
 local u32 nodeaddress<format=hex>;
 local u32 nodesize;
-local u32 writeaddress<format=hex> = FileSize();
+local u32 writeaddress<format=hex> = FileSize()+16;
 local u32 whatdo = InputRadioButtonBox("Node Manager","",0,"Add Node","Delete Node","Save Node","Add Boss");
 
 void ErrorNodeIndex(u32 nodeindex){

@@ -1,17 +1,18 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
 //
-//      File: 
+//      File: yakuza0.exe yakuzakiwami.exe
 //   Authors: 
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: 
+// File Mask: ctrl_type
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
 #include "../../Common/includes/include.h"
 local u32 headerColor = SetRandomBackColor();
+local u32 Count;
 LittleEndian();
 enum<ubyte> team{
     Invincible=0,
@@ -21,10 +22,23 @@ enum<ubyte> team{
     Boss=4,
 };
 
-FSeek(13716496);
+// Yakuza 0
+
+if(ReadShort(60)==360){
+    FSeek(13716496);
+    Count = 127;
+}
+
+// Yakuza Kiwami 1
+
+else if(ReadShort(60)==376){
+    FSeek(13096720);
+    Count = 156;
+};
+
 struct CtrlType{
     local int i;
-    for ( i = 0; i < 127; i++ ){
+    for ( i = 0; i < Count; i++ ){
         struct CtrlNode{
             SetRandomBackColor();
             char CtrlName[32];
@@ -40,4 +54,4 @@ struct CtrlType{
             char UnkString[32];
         }Ctrl<read=CtrlName, name="Ctrl_Type">;
     }
-}ctrltype;
+}ctrltype<read=i>;

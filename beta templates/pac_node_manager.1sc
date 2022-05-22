@@ -1,0 +1,405 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Script File
+//
+//      File: pac_node_manager.1sc
+//   Authors: Kan
+//   Version: 0.9.1 - Yakuza 5, Yakuza 0, Yakuza Kiwami 1 (beta script)
+//   Purpose: customize OE PAC files
+//            currently works with, and requires, all/any pac template
+//
+//   Thanks to Parallax Error and Biggelskog for their huge help.
+//   Special thanks to Akiyama and Nishiki for being lab rats.
+//   Violet is not allowed near the premises of PAC.
+//------------------------------------------------
+BigEndian();
+local u32 i;
+local u32 c;
+local s32 game=-1;
+local u32 ibool;
+local u32 nodeaddress<format=hex>;
+local u32 nodesize;
+local u32 nodeindex;
+local u32 writeaddress<format=hex> = FileSize()+16;
+local s32 newid<format=hex> = Random(2147483647) & 0x00FFFFFF;
+local s32 previd<format=hex>;
+local u32 insertcount = 0;
+local u32 pacfileindex = GetFileNum();
+local char templatename[] = GetTemplateFileName();
+local string whatdoname;
+local string nodefile; //////////////////
+local u32 whatdo = InputRadioButtonBox("Node Manager","",0,"Add Node","Delete Node","Save Node","Add Boss to Fight");
+
+if(exists(NPC_AKIYAMA_dispose)){
+    game=5;
+}
+else if(exists(c_am_shibusawa_noglas)){
+    game=0;
+}
+else if(exists(c_ae_nishiki_old)){
+    game=1;
+}
+else{
+    local int nogame = MessageBox( idYes | idNo,
+       "Error",
+       "Could not find game version.\nProceed with custom data?");
+    if(nogame == idNo){
+        Printf("Error reading pac: game version.");
+        Exit(0);
+    };
+};
+
+void InputNode(string whatdoname){
+    nodeindex = InputNumber(whatdoname,"Node Index:","");
+    if(nodeindex<0 || nodeindex>=pac.NodeCount){
+        MessageBox( idCancel,
+        "Error",
+        "Node[%i] does not exist.", nodeindex);
+        Exit(0);
+    }
+    else if(whatdo==3){
+         if(pac.pointers[nodeindex].Property!=42){
+            MessageBox( idCancel,
+                "Error",
+                "Node[%i] is not a fight!",
+                nodeindex);
+            Exit(0);
+        };
+    };
+    if(nodeindex==pac.NodeCount-1){
+        nodesize = FileSize() - pac.pointers[nodeindex].Data1Pointer;
+    }
+    else{
+        nodesize = pac.pointers[nodeindex+1].Data1Pointer - pac.pointers[nodeindex].Data1Pointer;
+    };
+};
+
+void RandomNodeID(){ // SHOULD be fixed
+    local u32 ir;
+    for(ir=0;ir<pac.NodeCount;ir++){
+        while(newid==pac.pointers[ir].FlagsHeader & 0x00FFFFFF || newid == previd){
+            //Printf("%i towards " , newid);
+            newid = Random(2147483647) & 0x00FFFFFF ;
+            //Printf("%i\n" , newid);
+        };
+    };
+};
+
+void UserCancel(u32 inputcancel){
+    if(inputcancel==BAD_VALUE){
+        Printf("Script cancelled by user.\n");
+        Exit(0);
+    };
+};
+
+void UserCancelRadio(s8 inputcancel){
+    if(inputcancel==-1){
+        Printf("Script cancelled by user.\n");
+        Exit(0);
+    };
+};
+
+void InputAddNode(){
+        nodefile = InputOpenFileName(
+            "",
+            "All files (*)",
+            "" );
+        if(nodefile==""){
+            Printf("Script cancelled by user.\n");
+            Exit(0);
+        };
+        FileOpen(nodefile,false,"",false);
+        if(ReadUInt(0)!=1195464960){
+            MessageBox( idCancel,
+                "Error",
+                "Cannot read node!");
+            Exit(0);
+        };
+};
+
+UserCancelRadio(whatdo);
+
+switch(whatdo){
+    case 0://add node//complete
+        InputAddNode();
+        local u32 nodeid = ReadInt(4);
+        local u16 gaysize1 = ReadShort(8);
+        local u16 gaysize2 = ReadShort(10);
+        local u32 rggsize = ReadInt(12);
+        local uchar nodedata[gaysize1+gaysize2]<format=hex>;
+        ReadBytes(nodedata, 16, gaysize1+gaysize2);
+        FileSelect(pacfileindex);
+        for(i=0;i<pac.NodeCount;i++){
+            local struct Repointadd{
+                if(pac.pointers[i].Data1Pointer>0){
+                    pac.pointers[i].Data1Pointer+=16;
+                };
+                if(pac.pointers[i].Data2Pointer>0){
+                    pac.pointers[i].Data2Pointer+=16;
+                };
+            }repointadd;
+        };
+
+        local u32 insertaddress<format=hex> = startof(pac.pointers.Data1Pointer) + 12;
+        InsertBytes(insertaddress,16,0);
+        WriteInt(insertaddress,nodeid);
+        WriteInt(insertaddress+4,writeaddress);
+        WriteInt(insertaddress+8,writeaddress+gaysize1);
+        WriteInt(insertaddress+12,rggsize);
+        WriteBytes(nodedata,writeaddress,gaysize1+gaysize2);
+        pac.NodeCount++;
+        break;
+
+    case 1: //delete node//complete
+        whatdoname = "Delete Node";
+        InputNode(whatdoname);
+        local u32 deleteheaderaddress = startof(pac.pointers[nodeindex].Data1Pointer) - 4;
+        for(i=0;i<pac.NodeCount;i++){
+            local struct Repointheader{
+                if(pac.pointers[i].Data1Pointer>0){
+                    pac.pointers[i].Data1Pointer-= 16;
+                };
+                if(pac.pointers[i].Data2Pointer>0){
+                    pac.pointers[i].Data2Pointer-= 16;
+                };
+            }repointheader;
+        };
+        for(i=nodeindex+1;i<pac.NodeCount;i++){
+            local struct Repointdel{
+                if(pac.pointers[i].Data1Pointer>0){
+                    pac.pointers[i].Data1Pointer-=nodesize;
+                };
+                if(pac.pointers[i].Data2Pointer>0){
+                    pac.pointers[i].Data2Pointer-=nodesize;
+                };
+            }repointdel;
+        };
+        DeleteBytes(pac.pointers[nodeindex].Data1Pointer,nodesize);
+        DeleteBytes(deleteheaderaddress,16);
+        pac.NodeCount--;
+        break;
+
+    case 2://save node//complete // i think it doesnt add *.bin
+        whatdoname = "Save Node";
+        InputNode(whatdoname);
+        nodeaddress = pac.pointers[nodeindex].Data1Pointer;
+        local uchar nodedata[nodesize]<format=hex>;
+        ReadBytes(nodedata, nodeaddress, nodesize);
+        local u32 nodeidwrite<format=hex> = ReadInt(startof(pac.pointers[nodeindex].Data1Pointer) - 4);
+        local u32 rgg1size = pac.pointers[nodeindex].Data1Size;
+        local u32 rgg2size = pac.pointers[nodeindex].Data2Size;
+        local u32 gay1size = pac.pointers[nodeindex].Data2Pointer - pac.pointers[nodeindex].Data1Pointer;
+        local u32 gay2size = nodesize - gay1size;
+        local u32 savenode = FileNew("Hex", true);
+        InsertBytes(0,4,0);
+        WriteString(0,"GAY");
+        WriteInt(4,nodeidwrite);
+        WriteShort(8,gay1size);
+        WriteShort(10,gay2size);
+        WriteShort(12,rgg1size);
+        WriteShort(14,rgg2size);
+        WriteBytes(nodedata,16,nodesize);
+        local string savefilename = InputSaveFileName("Save File", "Pac Node(bin) | All files(*)",".bin",".bin");
+        if(savefilename==""){
+            Exit(0);
+        };
+        FileSave(savefilename);
+        break;
+
+    case 3://add boss // add default y0, k1 - rework y5 default
+                      // customs are done
+
+        //fight node
+
+        whatdoname = "Add Boss";
+        InputNode(whatdoname);
+        local u32 fightnodename<format=hex> = ReadUInt(startof(pac.pointers[nodeindex].Property));
+        local uchar fightcoord[14];
+        ReadBytes(fightcoord , startof(pac.pointers[nodeindex].data2.fight.X) , 14);
+        local u32 inpbossamount = InputNumber(whatdoname,"How many?","1");
+        local u32 originalcount = pac.pointers[nodeindex].data2.fight.BossCount;
+        UserCancel(inpbossamount);
+        local bool copydata=false;
+        local s8 inputteam = InputRadioButtonBox("Add Boss","Choose team:",4,"Invincible","Player","Goon","Ally","Boss (Strong)");
+        UserCancelRadio(inputteam);
+        local s8 inputcopydata = InputRadioButtonBox("Add Boss","Copy from saved node?",1,
+                               "Attach saved boss","Use default data");
+        UserCancelRadio(inputcopydata);
+        if(inputcopydata==0){
+            copydata=true; // yes i know thats useless i'm lazy to change it now
+        };
+
+            // game variables ; moved UP v
+
+            local u8 gamebossprop = 5;
+            local u16 gamebosssize1;
+            local u16 gamebosssize2;
+            local u32 bossoffset;
+            local u32 teamoffset;
+            local u32 fightoffset;
+            local u32 fightdata2offset;
+            switch(game){
+                case 0:
+                    fightdata2offset = 36;
+                    gamebosssize1 = 72;
+                    gamebosssize2 = 76;
+                    bossoffset = 100;
+                    teamoffset = 110;
+                    fightoffset = 120;
+                    break;
+
+                case 1:
+                    fightdata2offset = 36;
+                    gamebosssize1 = 72;
+                    gamebosssize2 = 76;
+                    bossoffset = 100;
+                    teamoffset = 110;
+                    fightoffset = 120;
+                    break;
+
+                case 5:
+                    fightdata2offset = 44;
+                    gamebosssize1 = 72;
+                    gamebosssize2 = 84;
+                    bossoffset = 100;
+                    teamoffset = 108;
+                    fightoffset = 124;
+                    break;
+
+                default:
+                    gamebosssize1 = InputNumber("Add Boss","Boss Node Data 1 Size","72");
+                    gamebosssize2 = InputNumber("Add Boss","Boss Node Data 2 Size","84");
+                    bossoffset = InputNumber("Add Boss","Boss Node's Boss ID offset","28") + gamebosssize1;
+                    teamoffset = InputNumber("Add Boss","Boss Node's Team offset","36") + gamebosssize1;
+                    fightoffset = InputNumber("Add Boss","Boss Node's Fight ID offset","52") + gamebosssize1;
+                    fightdata2offset = InputNumber("Add Boss","Fight Node's Boss ID offset","36");
+                    break;
+
+            };
+
+            local u32 addedbosssize = gamebosssize1 + gamebosssize2;
+
+            // game variables ; moved UP ^
+        local u32 unkaddress<format=hex> = pac.pointers[nodeindex].Data2Pointer + fightdata2offset + pac.pointers[nodeindex].data2.fight.BossCount*4;
+        InsertBytes(unkaddress,inpbossamount*2,0);
+        insertcount = inpbossamount*2;
+        for(i=0;i<inpbossamount;i++){
+            local struct WriteFight{
+                RandomNodeID();
+                local u32 bossaddress<format=hex> = pac.pointers[nodeindex].Data2Pointer + fightdata2offset + (i*4);
+                local u32 bossproperty<format=hex> = newid | 0xFF000000;
+                local u32 newbossid<format=hex> = bossproperty & 0x05FFFFFF;
+                previd = newid;
+                InsertBytes(bossaddress,4,0);
+                insertcount += 4;
+                WriteInt(bossaddress,newbossid);
+                pac.pointers[nodeindex].data2.fight.BossCount++;
+            }writefight;
+        };
+
+        if(originalcount % 2 != 0 && inpbossamount % 2 != 0 && unkaddress+inpbossamount*4+inpbossamount*2+originalcount*2 < FileSize()){
+            DeleteBytes(unkaddress+inpbossamount*4+inpbossamount*2+originalcount*2,2);
+            insertcount-=2;
+        }
+        else if((originalcount + inpbossamount) % 2 != 0 && originalcount % 2 == 0){
+            InsertBytes(unkaddress+inpbossamount*4+inpbossamount*2+originalcount*2,2,0);
+            insertcount+=2;
+        };
+
+        pac.pointers[nodeindex].Data2Size += insertcount;
+        for(i=nodeindex+1;i<pac.NodeCount;i++){
+            local struct FightRepoint{
+                if(pac.pointers[i].Data1Pointer>0){
+                    pac.pointers[i].Data1Pointer += insertcount;
+                };
+                if(pac.pointers[i].Data2Pointer>0){
+                    pac.pointers[i].Data2Pointer += insertcount;
+                };
+            }fightrepoint;
+        };
+
+        // boss node(s)
+
+            /////// moved up v
+
+        for(i=0;i<pac.NodeCount;i++){
+            local struct RepointBoss{
+                if(pac.pointers[i].Data1Pointer>0){
+                    pac.pointers[i].Data1Pointer += 16 * inpbossamount;
+                };
+                if(pac.pointers[i].Data2Pointer>0){
+                    pac.pointers[i].Data2Pointer += 16 * inpbossamount;
+                };
+            }repointboss;
+        };
+
+        pac.NodeCount += inpbossamount;
+
+        local u32 insertaddress<format=hex> = startof(pac.pointers.Data1Pointer) + 12;
+        InsertBytes(insertaddress,16*inpbossamount,0);
+        writeaddress += 16 * ( inpbossamount - 1) + insertcount;
+
+            //////// moved up ^
+       
+//custom node part ALL GAMES
+        if(copydata==true){
+            InputAddNode();
+            local u8 nodebossprop = ReadByte(4);
+            local u16 nodebosssize1 = ReadUShort(8);
+            local u16 nodebosssize2 = ReadUShort(10);
+            if(nodebosssize1 != gamebosssize1 | nodebosssize2 != gamebosssize2 | nodebossprop != gamebossprop){
+                MessageBox( idCancel,
+                    "Error",
+                    "Cannot read node!");
+                Exit(0);
+            };
+
+            local uchar BossNodeData[addedbosssize];
+            ReadBytes( BossNodeData , 16 , addedbosssize );
+
+            FileSelect(pacfileindex);
+        }
+//custom node part END
+
+        else{
+            switch(game){
+                case 0: //nishiki
+                    local uchar BossNodeData[addedbosssize] = {32, 247, 16, 1, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 1, 6, 100, 67, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 68, 0, 0, 0, 52, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 178, 12, 74, 0, 0, 0, 0, 63, 134, 4, 25, 163, 201, 1, 0, 0, 0, 0, 250, 0, 0, 1, 87, 0, 0, 5, 244, 5, 66, 2, 181, 0, 0, 8, 0, 43, 255, 4, 0, 0, 0, 0, 0, 0, 0, 0, 185, 42, 66, 2, 176, 42, 66, 2, 176, 0, 0, 0, 0, 11, 64, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0};
+                    break;
+                case 1: //nishiki
+                    local uchar BossNodeData[addedbosssize] = {32, 247, 16, 1, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 1, 6, 100, 67, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 68, 0, 0, 0, 52, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 192, 152, 8, 49, 58, 131, 18, 111, 189, 206, 217, 23, 63, 120, 1, 0, 0, 0, 3, 34, 0, 0, 3, 35, 0, 0, 8, 17, 5, 38, 35, 204, 0, 0, 8, 0, 65, 255, 4, 13, 0, 0, 0, 0, 0, 0, 0, 185, 42, 38, 35, 203, 42, 38, 35, 203, 0, 0, 0, 0, 15, 64, 0, 0, 0, 0, 0, 47, 0, 0, 0, 47, 0, 0, 0, 0};
+                    break;
+                case 5: //akiyama
+                    local uchar BossNodeData[addedbosssize] = {32, 247, 16, 1, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 1, 6, 100, 67, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 68, 0, 0, 0, 52, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 66, 229, 232, 246, 60, 52, 57, 88, 194, 113, 129, 6, 191, 17, 1, 0, 0, 0, 0, 79, 0, 0, 11, 209, 0, 0, 1, 25, 5, 32, 1, 48, 0, 0, 205, 255, 4, 0, 1, 44, 10, 0, 0, 0, 128, 0, 0, 0, 0, 0, 255, 255, 42, 32, 1, 47, 42, 32, 1, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 222, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                    break;
+                default:
+                    local uchar BossNodeData[addedbosssize] = 0;
+                    break;
+            };
+        };
+
+            // write custom
+            for(i=0;i<inpbossamount;i++){
+        
+                // write header
+                WriteInt(insertaddress + 16 * i , writefight[i].newbossid);
+                WriteInt(insertaddress + 16 * i + 4 , writeaddress + addedbosssize * i);
+                WriteInt(insertaddress + 16 * i + 8 , writeaddress + addedbosssize * i + gamebosssize1);
+                WriteUShort(insertaddress + 16 * i + 12 , gamebosssize1);
+                WriteUShort(insertaddress + 16 * i + 14 , gamebosssize2);
+
+                // write node
+                WriteBytes(BossNodeData , writeaddress + addedbosssize * i , addedbosssize);
+                WriteInt( bossoffset + writeaddress + addedbosssize * i , writefight[i].newbossid);
+                WriteByte( teamoffset + writeaddress + addedbosssize * i , inputteam);
+                WriteInt( fightoffset + writeaddress + addedbosssize * i , fightnodename);
+                WriteInt( fightoffset + 4 + writeaddress + addedbosssize * i , fightnodename);
+                if(copydata==false){
+                    WriteBytes(fightcoord , gamebosssize1 + writeaddress + addedbosssize * i , 14);
+                };
+                
+            };
+
+        break;
+    default:
+        break;
+};

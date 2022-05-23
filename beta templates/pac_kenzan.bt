@@ -1,0 +1,129 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "../../Common/includes/include.h"
+BigEndian();
+local u32 i;
+local u32 u;
+local u32 headerColor = SetRandomBackColor();
+local u32 stay;
+
+enum<u32> property{
+
+Character_0 = 0,
+Dialog = 8,
+Character_9 = 9,
+
+};
+
+struct Pac{
+    u32 Count;
+    for(i=0;i<Count;i++){
+        struct Node{
+            SetRandomBackColor();
+            property Property : 8;
+            u32 NodeID : 24<format=hex>;
+            u32 Data1Size;
+            u32 Data2Size;
+            u32 Data1Pointer<format=hex>;
+            u32 Data2Pointer<format=hex>;
+            stay=FTell();
+            if(Data1Pointer>0){
+                FSeek(Data1Pointer);
+                struct Data1{
+                    for(u=0;u<Data1Size/4;u++){
+                        u32 Unk;
+                    };
+                }data1;
+            };
+            if(Data2Pointer>0){
+                FSeek(Data2Pointer);
+                struct Data2{
+                    f32 X;
+                    f32 Y;
+                    f32 Z;
+                    switch(node.Property){
+                        case 0:
+                            s16 UnkShort[2];
+                            u32 PaddingProbably[4];
+                            char Behavior[32];
+                            char Model[64];
+                            char Animation[32];
+                            s32 UnkInt[8];
+                            u32 RefNodeID[10]<format=hex>;
+                            string Asset<comment="Item or Weapon">;
+                            local string ReadData2=Model;
+                            if(node.Data2Size > 237){
+                                FSeek(node.Data2Pointer + 236);
+                                    string String;
+                            };
+                            break;
+                        case 8:
+                            u32 PaddingProbably[13];
+                            char Text[96];
+                            s32 PossiblySizes[8];
+                            f32 Float[4];
+                            s32 NodeRefID[10]<format=hex>;
+                            local string ReadData2=Text;
+                            break;
+                        case 9:
+                            u32 PaddingProbably[13];
+                            char String1[64];
+                            s32 Unk[16];
+                            u32 RefNodeID[7]<comment="Property 8 and 7?",format=hex>;
+                            string String2;
+                            local string ReadData2=String1;
+                            break;
+                        default:
+                            for(u=0;u<(Data2Size-12)/4;u++){
+                                u32 Unk;
+                            };
+                            local string ReadData2;
+                            break;
+                    };
+                }data2<read=ReadData2>;
+            };
+            FSeek(stay);
+        }node<name="Node",read=ReadProperty,comment=data2.ReadData2>;
+    };
+}pac<name="Pac">;
+
+
+string ReadProperty(Node &r)
+{
+    local string null = "";
+    switch (r.Property)
+    {
+        case 0:
+            return "Character (0)";
+        /*case 1:
+            return "Action";
+        case 2:
+            return "Road Block";
+        case 3:
+            return "Phone";*/
+        case 8:
+            return "Dialog";
+        case 9: //case 5:
+            return "Character (9)";/*
+        case 11:
+            return "Item";
+        case 24:
+            return "Ambient (ACB)";
+        case 42:
+            return "Fight";
+        case 64:
+            return "Ambient (BGM)";*/
+        default:
+            return "";
+    }
+};

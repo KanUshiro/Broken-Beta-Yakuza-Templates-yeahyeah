@@ -3,7 +3,7 @@
 //
 //      File: cth.bt
 //   Authors: Kan
-//   Version: 1.0
+//   Version: 1.1
 //   Purpose: making sense of this bad format
 //  Category: cbt
 // File Mask: 
@@ -22,8 +22,8 @@ struct Cloth{
         u32 EndianCheck<name="Endian Check",format=hex>;
         u32 Version<name="Version">;
         u32 Size<name="Size">;
-        u8 Unk1;
-        u8 Unk2;
+        u8 Stiffness;
+        bool Close<name="Mesh is Closed">;
         u16 Unused<hidden=true>;
         u16 ColumnCount<name="Column Vertex Count">;
         u16 RowCount<name="Row Vertex Count">;
@@ -33,10 +33,10 @@ struct Cloth{
         u32 BonePointer<format=hex,name="Node Pointer">;
         u32 VerticesCount<name="Vertex Count">;
         u32 VerticesPointer<format=hex,name="Vertex Pointer">;
-        u32 Colli1Count<name="Constraints Count [1]">;
-        u32 Colli1Pointer<format=hex,name="Constraints Pointer [1]">;
-        u32 Colli2Count<name="Constraints Count [2]">;
-        u32 Colli2Pointer<format=hex,name="Constraints Pointer [2]">;
+        u32 NormalCount<name="Normal Count">;
+        u32 NormalPointer<format=hex,name="Normals Pointer">;
+        u32 TangentCount<name="Tangent Count">;
+        u32 TangentPointer<format=hex,name="Tangents Pointer">;
     }header<name="Header">;
 
     struct Shader{
@@ -212,10 +212,10 @@ struct Cloth{
         SPrintf( nameprint, "Mesh: [%s]", meshname);
     }vertices<read=a,name=nameprint>;
 
-    FSeek(header.Colli1Pointer);
-    struct Colli1{
-        for(i=0;i<header.Colli1Count;i++){
-            struct Cl1{
+    FSeek(header.NormalPointer);
+    struct Normals{
+        for(i=0;i<header.NormalCount;i++){
+            struct Norm{
                 SetRandomBackColor();
                 float X;
                 float Y;
@@ -223,18 +223,14 @@ struct Cloth{
                 local string readcl;
                 SPrintf( readcl, "[%f, %f, %f]",X,Y,Z);
                 FSkip(4);
-            }cl1<read=readcl,name="Vertex Constraint">;
+            }norm<read=readcl,name="Normal">;
         };
-        local int n=i;
-        local string constraintname = ReadLine(header.BonePointer + ( header.BoneCount - 2 ) * 96 + 2);
-        local string nameprint;
-        SPrintf( nameprint, "Constraint: [%s]", constraintname);
-    }colli1<read=n,name=nameprint>;
+    }normals<read=i,name="Normals">;
 
-    FSeek(header.Colli2Pointer);
-    struct Colli2{
-        for(i=0;i<header.Colli2Count;i++){
-            struct Cl2{
+    FSeek(header.TangentPointer);
+    struct Tangents{
+        for(i=0;i<header.TangentCount;i++){
+            struct Tangent{
                 SetRandomBackColor();
                 float X;
                 float Y;
@@ -242,13 +238,9 @@ struct Cloth{
                 local string readcl;
                 SPrintf( readcl, "[%f , %f, %f]",X,Y,Z);
                 FSkip(4);
-            }cl2<read=readcl,name="Vertex Constraint">;
+            }tang<read=readcl,name="Tangent">;
         };
-        local int s=i;
-        local string constraintname = ReadLine(header.BonePointer + ( header.BoneCount - 3 ) * 96 + 2);
-        local string nameprint;
-        SPrintf( nameprint, "Constraint: [%s]", constraintname);
-    }colli2<read=s,name=nameprint>;
+    }tangents<read=i,name="Tangents">;
 }cth<name="cth">;
 
 void ReadColli(float X,float Y,float Z){

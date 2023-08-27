@@ -8,6 +8,9 @@ enum<int32> PropertyType
     Item = 11,
     AmbientACB = 24,
     Fight = 42,
+    UnkFight = 43,
+    // 43 : looking like fight, pulling some shit up (2B)
+    // 44 : same, called from 43 (2C), calling for an inmate?? and also call 2B
     AmbientHCA = 64,
 };
 

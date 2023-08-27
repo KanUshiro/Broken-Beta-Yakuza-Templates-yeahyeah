@@ -3,12 +3,13 @@
 //                                                          take everything in the template w/ a grain of salt!
 //   File: PAC
 //   Author: Kan#7925
-//   Version: 1.5
+//   Version: 1.6
 //   Purpose: edit OE stage entities // y5 version
 //   File Mask: pac_*.bin, scenario/player_pos.bin
 //   Big thanks: Draxx182 for teaching me templates,
 //               Parallax Error for a HUGE amount of help,
-//               Timo654 for his templates I studied, & Retraso for dispose_string exporter
+//               Timo654 for his templates I studied, Retraso for dispose_string exporter
+//                Biggelskog for sending me the latest version of my own template
 //------------------------------------------------
 #include "../../Common/includes/include.h"
 #include "pac_enums_y5.bt"
@@ -45,10 +46,10 @@ struct Pac{
                         SetRandomBackColor();
                         PropertyType Property : 8<format=hex, name="Property Type">;
                         int32 FlagsHeader : 24 <format=hex, name="Node ID">;
-                        int32 Data1Pointer<hidden=true>;
-                        int32 Data2Pointer<hidden=true>;
-                        int16 Data1Size<hidden=true>;
-                        int16 Data2Size<hidden=true>;
+                        int32 Data1Pointer<name="Data 1 Pointer",comment="Already done by script!",format=hex>;
+                        int32 Data2Pointer<name="Data 2 Pointer",comment="Fix manually!",format=hex>;
+                        int16 Data1Size<name="Data 1 Size",comment="Fix manually!">;
+                        int16 Data2Size<name="Data 2 Size",comment="Fix manually!">;
                         local int stay = FTell();
 
                         FSeek(Data1Pointer);
@@ -381,25 +382,6 @@ struct Pac{
                                             DisposeID Weapon<name="Weapon">;
                                             DisposeID BattleIntro<name="Battle Intro">;
                                             DisposeID Unk;
-                                            //byte Unused5[3]<hidden=true>;
-                                            //byte FighterFlags<format=binary, name="Fighter Flags">;
-                                            //int32 UnkFighterFlags[6];
-                                            //DisposeID NpcType<name="NPC Type">;
-                                            //DisposeID Unk;
-                                            //int32 UnkFighterFlags2[4];
-                                            //int16 Unused<hidden=true>;
-                                            //Moveset MovesetID<name="Moveset">;
-                                            //byte UnkFlags<format=binary>;
-                                            //int32 UnkFlags;
-                                            //int32 Unused<hidden=true>;
-                                            //byte CharacterFlags<format=binary, name="Character Flags">;
-                                            //byte UnkFlags<format=binary>;
-                                            //int16 Unused<hidden=true>;
-                                            //int32 Unused<hidden=true>;
-                                            //DisposeID Name<name="Name">;
-                                            //DisposeID Weapon1<name="Weapon 1">;
-                                            //DisposeID BattleIntro<name="Battle Intro">;
-                                            //DisposeID Weapon2<name="Weapon 2">; //never managed to make it load
                                         }fighterdata<name="Fighter Data">;
                                     }
                                 else if (character.Fighter==128, character.ChildCountMain>1, pointers.Data2Size<204)
@@ -484,18 +466,26 @@ struct Pac{
                                     Moveset MovesetID<name="Moveset">;
                                     ubyte UnkByte;
                                     Enemy Team<name="Team">;
-                                    ubyte UnkBytes2[11];
-                                    DisposeID Probablynotadispose;
-                                    //byte UnkFlags<format=binary>;
-                                    //byte Unused<hidden=true>;
-                                    //Moveset MovesetID<name="Moveset">;
-                                    //byte UnkFlags<format=binary>;
-                                    //Enemy Team<name="Team">;
-                                    //ubyte HP<name="HP">; //unsure
-                                    //ubyte Height<name="Height">;
+                                    ubyte UnkByte;
+                                    u16 HP<name="HP">;
+                                    u8 DMG<name="Damage Multiplier">;
+                                    u8 Padding[3];
+                                    struct BossCharFlags{
+                                        Toggle HPOff : 1<name="Ignore PAC HP/Damage">;
+                                        Toggle Unk1 : 1<name="Unk Flag">;
+                                        Toggle Unk2: 1<name="Unk Flag">;
+                                        Toggle Unk3 : 1<name="Unk Flag">;
+                                        Toggle Unk4 : 1<name="Unk Flag">;
+                                        Toggle Unk5 : 1<name="Unk Flag">;
+                                        Toggle Unk6 : 1<name="Unk Flag">;
+                                        Toggle Unk7 : 1<name="Unk Flag">;
+                                    }bosscharflags<name="Boss Flags">;
+                                    u8 UnkBytes2[7];
                                     int32 FightFlags[2]<format=hex, name="Fight Node ID">;
                                     ubyte UnkValue[4]<comment="Related to spawn/death in O/k1">;
-                                    DisposeID DisposeUnksMaybe[5];
+                                    DisposeID Unk[1];
+                                    DisposeID Weapon<name="Weapon">;
+                                    DisposeID Unk2[3];
                                 }boss<name="Boss">;
                             }
                             else if (Property==11)
@@ -567,6 +557,34 @@ struct Pac{
                                             uint16 Unk;
                                         }
                                     }fight<name="Fight">;
+                                }
+                            else if (Property==43)
+                                {
+                                struct UnkFight{
+                                    float X;
+                                    float Y;
+                                    float Z;
+                                    int16 W;
+                                    byte ChildCountMain<name="Total Data 2 Count",comment="Warning: Avoid changing this randomly!">;
+                                    byte UnkFlags<format=binary>;
+                                    f32 UnkFloats[6];
+                                    u32 Padding;
+                                    u32 FightNode[2]<format=hex,name="Fight Node">;
+                                    u32 UnkPointer<hidden=true>;
+                                    u32 Padding;
+                                    int16 NodeCount<name="Node IDs Count",comment="Warning: Avoid changing this randomly!">;
+                                    int16 Unused[7]<hidden=true>;
+                                    local int gr;
+                                    for (gr = 0; gr < NodeCount; gr++)
+                                        {
+                                            int32 NodeFlag<name="Node ID", format=hex>;
+                                        }
+                                    local int pf;
+                                    for (pf = 0; pf < NodeCount; pf++)
+                                        {
+                                            uint16 Unk;
+                                        }
+                                    }unkfight<name="Unk Fight",comment="idk what it is but same structure as fight">;
                                 }
                             else if (Property==64)
                                 {
@@ -712,6 +730,8 @@ string ReadProperty(Pointers &r)
             return "Ambient (ACB)";
         case 42:
             return "Fight";
+        case 43:
+            return "Unk Fight";
         case 64:
             return "Ambient (BGM)";
         default:
